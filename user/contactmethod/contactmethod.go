@@ -46,6 +46,8 @@ func (c ContactMethod) Normalize() (*ContactMethod, error) {
 		err = validate.Many(err, validate.AbsoluteURL("Value", c.Value))
 	case TypePush:
 		c.Value = ""
+	case TypeSlackDM:
+		err = validate.Many(err, validate.ASCII("Value", c.Value, 3, 128))
 	}
 
 	if err != nil {
