@@ -47,6 +47,9 @@ func (c ContactMethod) Normalize() (*ContactMethod, error) {
 	case TypePush:
 		c.Value = ""
 	case TypeSlackDM:
+		// We want to do some basic validation here, but we don't want to
+		// require the full Slack ID format (which is a bit more complex)
+		// as it may change in the future.
 		err = validate.Many(err, validate.ASCII("Value", c.Value, 3, 128))
 	}
 
