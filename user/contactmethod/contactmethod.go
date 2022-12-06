@@ -34,7 +34,7 @@ func (c ContactMethod) Normalize() (*ContactMethod, error) {
 	err := validate.Many(
 		validate.UUID("ID", c.ID),
 		validate.IDName("Name", c.Name),
-		validate.OneOf("Type", c.Type, TypeSMS, TypeVoice, TypeEmail, TypePush, TypeWebhook),
+		validate.OneOf("Type", c.Type, TypeSMS, TypeVoice, TypeEmail, TypePush, TypeWebhook, TypeSlackDM),
 	)
 
 	switch c.Type {
