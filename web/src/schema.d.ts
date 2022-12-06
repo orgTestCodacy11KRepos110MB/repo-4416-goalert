@@ -109,6 +109,24 @@ export interface SlackChannelConnection {
   pageInfo: PageInfo
 }
 
+export interface SlackUserSearchOptions {
+  first?: null | number
+  after?: null | string
+  search?: null | string
+  omit?: null | string[]
+}
+
+export interface SlackUser {
+  id: string
+  name: string
+  teamID: string
+}
+
+export interface SlackUserConnection {
+  nodes: SlackUser[]
+  pageInfo: PageInfo
+}
+
 export interface SystemLimit {
   id: SystemLimitID
   description: string
@@ -967,7 +985,12 @@ export interface UserNotificationRule {
   contactMethod?: null | UserContactMethod
 }
 
-export type ContactMethodType = 'SMS' | 'VOICE' | 'EMAIL' | 'WEBHOOK'
+export type ContactMethodType =
+  | 'SMS'
+  | 'VOICE'
+  | 'EMAIL'
+  | 'WEBHOOK'
+  | 'SLACK_DM'
 
 export interface UserContactMethod {
   id: string

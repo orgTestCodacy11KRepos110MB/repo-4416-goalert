@@ -40,10 +40,11 @@ export default function UserContactMethodCreateDialog(props: {
   title?: string
   subtitle?: string
 }): JSX.Element {
-  const [allowSV, allowE, allowW] = useConfigValue(
+  const [allowSV, allowE, allowW, allowS] = useConfigValue(
     'Twilio.Enable',
     'SMTP.Enable',
     'Webhook.Enable',
+    'Slack.Enable',
   )
   let typeVal: ContactMethodType = 'VOICE'
   if (allowSV) {
@@ -52,7 +53,10 @@ export default function UserContactMethodCreateDialog(props: {
     typeVal = 'EMAIL'
   } else if (allowW) {
     typeVal = 'WEBHOOK'
+  } else if (allowS) {
+    typeVal = 'SLACK_DM'
   }
+
   // values for contact method form
   const [CMValue, setCMValue] = useState<Value>({
     name: '',

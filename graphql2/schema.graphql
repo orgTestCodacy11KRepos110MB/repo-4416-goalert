@@ -189,6 +189,24 @@ type SlackChannelConnection {
   pageInfo: PageInfo!
 }
 
+input SlackUserSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+}
+
+type SlackUser {
+  id: ID! # team:name
+  name: String!
+  teamID: String!
+}
+
+type SlackUserConnection {
+  nodes: [SlackUser!]!
+  pageInfo: PageInfo!
+}
+
 type SystemLimit {
   id: SystemLimitID!
   description: String!
@@ -245,7 +263,6 @@ input UserOverrideSearchOptions {
   start: ISOTimestamp # start of the window to search for.
   end: ISOTimestamp # end of the window to search for.
 }
-
 
 type UserOverrideConnection {
   nodes: [UserOverride!]!
@@ -1218,6 +1235,7 @@ enum ContactMethodType {
   VOICE
   EMAIL
   WEBHOOK
+  SLACK_DM
 }
 
 # A method of contacting a user.

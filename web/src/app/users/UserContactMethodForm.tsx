@@ -72,6 +72,20 @@ function renderURLField(edit: boolean): JSX.Element {
   )
 }
 
+function renderSlackField(edit: boolean): JSX.Element {
+  return (
+    <FormField
+      fullWidth
+      name='value'
+      required
+      label='Slack Username'
+      placeholder='teamID:userID'
+      component={TextField}
+      disabled={edit}
+    />
+  )
+}
+
 function renderTypeField(type: ContactMethodType, edit: boolean): JSX.Element {
   switch (type) {
     case 'SMS':
@@ -81,6 +95,8 @@ function renderTypeField(type: ContactMethodType, edit: boolean): JSX.Element {
       return renderEmailField(edit)
     case 'WEBHOOK':
       return renderURLField(edit)
+    case 'SLACK_DM':
+      return renderSlackField(edit)
     default:
   }
 
@@ -105,13 +121,19 @@ export default function UserContactMethodForm(
 ): JSX.Element {
   const { value, edit = false, ...other } = props
 
-  const [smsVoiceEnabled, emailEnabled, webhookEnabled, disclaimer] =
-    useConfigValue(
-      'Twilio.Enable',
-      'SMTP.Enable',
-      'Webhook.Enable',
-      'General.NotificationDisclaimer',
-    )
+  const [
+    smsVoiceEnabled,
+    emailEnabled,
+    webhookEnabled,
+    slackEnabled,
+    disclaimer,
+  ] = useConfigValue(
+    'Twilio.Enable',
+    'SMTP.Enable',
+    'Webhook.Enable',
+    'Slack.Enable',
+    'General.NotificationDisclaimer',
+  )
 
   return (
     <FormContainer
@@ -148,11 +170,14 @@ export default function UserContactMethodForm(
           >
             {(edit || smsVoiceEnabled) && <MenuItem value='SMS'>SMS</MenuItem>}
             {(edit || smsVoiceEnabled) && (
-              <MenuItem value='VOICE'>VOICE</MenuItem>
+              <MenuItem value='VOICE'>Voice</MenuItem>
             )}
-            {(edit || emailEnabled) && <MenuItem value='EMAIL'>EMAIL</MenuItem>}
+            {(edit || emailEnabled) && <MenuItem value='EMAIL'>Email</MenuItem>}
             {(edit || webhookEnabled) && (
-              <MenuItem value='WEBHOOK'>WEBHOOK</MenuItem>
+              <MenuItem value='WEBHOOK'>Webhook</MenuItem>
+            )}
+            {(edit || slackEnabled) && (
+              <MenuItem value='SLACK_DM'>Slack DM</MenuItem>
             )}
           </FormField>
         </Grid>
