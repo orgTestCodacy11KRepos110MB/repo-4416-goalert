@@ -51,6 +51,7 @@ func (db *DB) UpdateAll(ctx context.Context) error {
 		// but we need to store the contact method id in the format "team_id:user_id"
 		teamID := strings.TrimPrefix(s.ProviderID, "slack:")
 		cm := &contactmethod.ContactMethod{
+			// TODO: name must be unique
 			Name:   "Slack",
 			Type:   contactmethod.TypeSlackDM,
 			Value:  fmt.Sprintf("%s:%s", teamID, s.SubjectID),
