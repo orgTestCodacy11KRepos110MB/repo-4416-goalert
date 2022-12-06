@@ -129,7 +129,7 @@ func NewEngine(ctx context.Context, db *sql.DB, c *Config) (*Engine, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "metrics management backend")
 	}
-	compatMgr, err := compatmanager.NewDB(ctx, db, c.ContactMethodStore)
+	compatMgr, err := compatmanager.NewDB(ctx, db)
 	if err != nil {
 		return nil, errors.Wrap(err, "compatibility backend")
 	}

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/target/goalert/permission"
-	"github.com/target/goalert/user/contactmethod"
 	"github.com/target/goalert/util/log"
 )
 
@@ -48,22 +48,18 @@ func (db *DB) UpdateAll(ctx context.Context) error {
 
 	for _, s := range subs {
 		// provider id contains the team id in the format "slack:team_id"
-		// but we need to store the contact method id in the format "team_id:user_id"
+		// but we need to store the contact method id in the format "team_id:subject_id"
 		teamID := strings.TrimPrefix(s.ProviderID, "slack:")
-		cm := &contactmethod.ContactMethod{
-			// TODO: name must be unique
-			Name:   "Slack",
-			Type:   contactmethod.TypeSlackDM,
-			Value:  fmt.Sprintf("%s:%s", teamID, s.SubjectID),
-			UserID: s.UserID,
-		}
+		value := fmt.Sprintf("%s:%s", teamID, s.SubjectID)
 
-		cm, err = db.cm.CreateTx(ctx, tx, cm)
+		cmID := uuid.New()
+		// TODO: name must be unique
+		_, err = tx.StmtContext(ctx, db.insertCM).ExecContext(ctx, cmID, "Slack", "SLACK_DM", value, s.UserID)
 		if err != nil {
-			return fmt.Errorf("create cm: %w", err)
+			return fmt.Errorf("insert cm: %w", err)
 		}
 
-		_, err = tx.StmtContext(ctx, db.updateSubCMID).ExecContext(ctx, s.ID, cm.ID)
+		_, err = tx.StmtContext(ctx, db.updateSubCMID).ExecContext(ctx, s.ID, cmID)
 		if err != nil {
 			return fmt.Errorf("update sub cm_id: %w", err)
 		}
