@@ -15,6 +15,14 @@ import (
 	"github.com/target/goalert/search"
 )
 
+func (q *Query) SlackUser(ctx context.Context, id string) (*slack.User, error) {
+	return q.SlackStore.User(ctx, id)
+}
+
+func (q *Query) SlackUsers(ctx context.Context, input *graphql2.SlackUserSearchOptions) (*graphql2.SlackUserConnection, error) {
+	return nil, nil
+}
+
 func (q *Query) SlackChannel(ctx context.Context, id string) (*slack.Channel, error) {
 	return q.SlackStore.Channel(ctx, id)
 }

@@ -456,6 +456,24 @@ type SlackChannelSearchOptions struct {
 	Omit   []string `json:"omit"`
 }
 
+type SlackUser struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	TeamID string `json:"teamID"`
+}
+
+type SlackUserConnection struct {
+	Nodes    []SlackUser `json:"nodes"`
+	PageInfo *PageInfo   `json:"pageInfo"`
+}
+
+type SlackUserSearchOptions struct {
+	First  *int     `json:"first"`
+	After  *string  `json:"after"`
+	Search *string  `json:"search"`
+	Omit   []string `json:"omit"`
+}
+
 type StringConnection struct {
 	Nodes    []string  `json:"nodes"`
 	PageInfo *PageInfo `json:"pageInfo"`

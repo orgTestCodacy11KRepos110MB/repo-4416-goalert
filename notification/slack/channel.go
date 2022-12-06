@@ -63,6 +63,13 @@ type Channel struct {
 	TeamID string
 }
 
+// User contains information about a Slack user.
+type User struct {
+	ID     string
+	Name   string
+	TeamID string
+}
+
 func rootMsg(err error) string {
 	unwrapped := errors.Unwrap(err)
 	if unwrapped == nil {
