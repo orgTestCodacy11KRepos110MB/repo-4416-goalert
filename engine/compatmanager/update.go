@@ -18,6 +18,71 @@ func (db *DB) UpdateAll(ctx context.Context) error {
 	}
 	log.Debugf(ctx, "Running compat operations.")
 
+	err = db.updateContactMethods(ctx)
+	if err != nil {
+		return fmt.Errorf("update contact methods: %w", err)
+	}
+
+	err = db.updateAuthSubjects(ctx)
+	if err != nil {
+		return fmt.Errorf("update auth subjects: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) updateAuthSubjects(ctx context.Context) error {
+	tx, err := db.lock.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	type cm struct {
+		ID          uuid.UUID
+		UserID      uuid.UUID
+		SlackUserID string
+		SlackTeamID string
+	}
+
+	var cms []cm
+	rows, err := tx.StmtContext(ctx, db.cmMissingSub).QueryContext(ctx)
+	if err != nil {
+		return fmt.Errorf("query: %w", err)
+	}
+	for rows.Next() {
+		var c cm
+		err = rows.Scan(&c.ID, &c.UserID, &c.SlackUserID)
+		if err != nil {
+			return fmt.Errorf("scan: %w", err)
+		}
+
+		u, err := db.cs.User(ctx, c.SlackUserID)
+		if err != nil {
+			log.Log(ctx, err)
+			continue
+		}
+
+		c.SlackTeamID = u.TeamID
+		cms = append(cms, c)
+	}
+
+	for _, c := range cms {
+		_, err = tx.StmtContext(ctx, db.insertSub).ExecContext(ctx, c.UserID, c.SlackUserID, "slack:"+c.SlackTeamID, c.ID)
+		if err != nil {
+			return fmt.Errorf("insert: %w", err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("commit: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) updateContactMethods(ctx context.Context) error {
 	tx, err := db.lock.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
