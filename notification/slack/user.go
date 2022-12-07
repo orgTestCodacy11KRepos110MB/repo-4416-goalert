@@ -31,22 +31,3 @@ func (s *ChannelSender) User(ctx context.Context, id string) (*User, error) {
 		TeamID: usr.TeamID,
 	}, nil
 }
-
-func (s *ChannelSender) Users(ctx context.Context, search string) ([]*User, error) {
-	err := permission.LimitCheckAny(ctx, permission.User, permission.System)
-	if err != nil {
-		return nil, err
-	}
-
-	// call slack api with team:name id and get user info to return
-	var usr *[]slack.User
-	err = s.withClient(ctx, func(c *slack.Client) error {
-		usr, err = c.GetUsersInfoContext(ctx, "")
-		return err
-	})
-	if err != nil {
-		return nil, fmt.Errorf("get user: %w", err)
-	}
-
-	return nil, nil
-}
