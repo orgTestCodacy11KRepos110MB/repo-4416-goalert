@@ -312,6 +312,10 @@ func (s *ChannelSender) Send(ctx context.Context, msg notification.Message) (*no
 	var opts []slack.MsgOption
 	var isUpdate bool
 	switch t := msg.(type) {
+	case notification.Test:
+		opts = append(opts, slack.MsgOptionText("This is a test message.", false))
+	case notification.Verification:
+		opts = append(opts, slack.MsgOptionText(fmt.Sprintf("Your verification code is: %06d", t.Code), false))
 	case notification.Alert:
 		if t.OriginalStatus != nil {
 			// Reply in thread if we already sent a message for this alert.

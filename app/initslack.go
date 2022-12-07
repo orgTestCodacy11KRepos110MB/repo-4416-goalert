@@ -17,5 +17,7 @@ func (app *App) initSlack(ctx context.Context) error {
 		return err
 	}
 	app.notificationManager.RegisterSender(notification.DestTypeSlackChannel, "Slack-Channel", app.slackChan)
+	app.notificationManager.RegisterSender(notification.DestTypeSlackDM, "Slack-DM", app.slackChan.DMSender())
+
 	return nil
 }

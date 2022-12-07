@@ -9,6 +9,8 @@ import (
 )
 
 // User will lookup a single Slack user
+//
+// TODO: caching
 func (s *ChannelSender) User(ctx context.Context, id string) (*User, error) {
 	err := permission.LimitCheckAny(ctx, permission.User, permission.System)
 	if err != nil {
