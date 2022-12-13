@@ -8,17 +8,23 @@ import (
 	"github.com/target/goalert/permission"
 )
 
-// User will lookup a single Slack user
-//
-// TODO: caching
+// User will lookup a single Slack user.
 func (s *ChannelSender) User(ctx context.Context, id string) (*User, error) {
 	err := permission.LimitCheckAny(ctx, permission.User, permission.System)
 	if err != nil {
 		return nil, err
 	}
 
+	usr, ok := s.userInfoCache.Get(id)
+	if ok {
+		return &User{
+			ID:     usr.ID,
+			Name:   usr.Name,
+			TeamID: usr.TeamID,
+		}, nil
+	}
+
 	// call slack api with team:name id and get user info to return
-	var usr *slack.User
 	err = s.withClient(ctx, func(c *slack.Client) error {
 		usr, err = c.GetUserInfoContext(ctx, id)
 		return err
@@ -26,6 +32,8 @@ func (s *ChannelSender) User(ctx context.Context, id string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get user: %w", err)
 	}
+
+	s.userInfoCache.Add(id, usr)
 
 	return &User{
 		ID:     usr.ID,
