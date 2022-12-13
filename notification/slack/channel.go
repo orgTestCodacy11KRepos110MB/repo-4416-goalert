@@ -116,6 +116,18 @@ func (s *ChannelSender) Channel(ctx context.Context, channelID string) (*Channel
 	return res, nil
 }
 
+func (s *ChannelSender) TeamName(ctx context.Context, id string) (name string, err error) {
+	err = s.withClient(ctx, func(c *slack.Client) error {
+		info, err := c.GetTeamInfoContext(ctx)
+		if err != nil {
+			return err
+		}
+		name = info.Name
+		return nil
+	})
+	return name, err
+}
+
 func (s *ChannelSender) TeamID(ctx context.Context) (string, error) {
 	cfg := config.FromContext(ctx)
 
