@@ -53,11 +53,18 @@ func NewDB(ctx context.Context, db *sql.DB, cs *slack.ChannelSender) (*DB, error
 		`),
 
 		// update cm_id for a given user_id and subject_id
-		updateSubCMID: p.P(`update auth_subjects set cm_id = $2 where id = $1`),
+		updateSubCMID: p.P(`
+			update auth_subjects
+			set cm_id = (
+				select id from user_contact_methods
+				where type = 'SLACK_DM' and value = $2
+			) where id = $1
+		`),
 
 		insertCM: p.P(`
 			insert into user_contact_methods (id, name, type, value, user_id)
 			values ($1, $2, $3, $4, $5)
+			on conflict (type, value) do nothing
 		`),
 
 		// find verified contact methods (disabled false) with no auth subject

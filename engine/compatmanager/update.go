@@ -115,19 +115,19 @@ func (db *DB) updateContactMethods(ctx context.Context) error {
 		// provider id contains the team id in the format "slack:team_id"
 		// but we need to store the contact method id in the format "team_id:subject_id"
 		teamID := strings.TrimPrefix(s.ProviderID, "slack:")
-		value := fmt.Sprintf("%s:%s", teamID, s.SubjectID)
+		value := s.SubjectID
 		name, err := db.cs.TeamName(ctx, teamID)
 		if err != nil {
 			log.Log(ctx, err)
 			continue
 		}
-		cmID := uuid.New()
-		_, err = tx.StmtContext(ctx, db.insertCM).ExecContext(ctx, cmID, name, "SLACK_DM", value, s.UserID)
+
+		_, err = tx.StmtContext(ctx, db.insertCM).ExecContext(ctx, uuid.New(), name, "SLACK_DM", value, s.UserID)
 		if err != nil {
 			return fmt.Errorf("insert cm: %w", err)
 		}
 
-		_, err = tx.StmtContext(ctx, db.updateSubCMID).ExecContext(ctx, s.ID, cmID)
+		_, err = tx.StmtContext(ctx, db.updateSubCMID).ExecContext(ctx, s.ID, value)
 		if err != nil {
 			return fmt.Errorf("update sub cm_id: %w", err)
 		}
