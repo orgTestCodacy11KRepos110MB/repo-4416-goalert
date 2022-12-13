@@ -18,13 +18,13 @@ func newTTLCache[K comparable, V any](maxEntries int, ttl time.Duration) *ttlCac
 	}
 }
 
-type cacheItem struct {
+type cacheItem[V any] struct {
 	expires time.Time
-	value   interface{}
+	value   V
 }
 
 func (c *ttlCache[K, V]) Add(key lru.Key, value V) {
-	c.Cache.Add(key, cacheItem{
+	c.Cache.Add(key, cacheItem[V]{
 		value:   value,
 		expires: time.Now().Add(c.ttl),
 	})
@@ -35,9 +35,10 @@ func (c *ttlCache[K, V]) Get(key K) (val V, ok bool) {
 	if !ok {
 		return val, false
 	}
-	cItem := item.(cacheItem)
+
+	cItem := item.(cacheItem[V])
 	if time.Until(cItem.expires) > 0 {
-		return cItem.value.(V), true
+		return cItem.value, true
 	}
 
 	return val, false
