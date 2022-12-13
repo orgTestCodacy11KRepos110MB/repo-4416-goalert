@@ -25,10 +25,12 @@ type ChannelSender struct {
 	chanCache *ttlCache[string, *Channel]
 	listCache *ttlCache[string, []Channel]
 
+	teamInfoCache *ttlCache[string, *slack.TeamInfo]
 	listMx sync.Mutex
 	chanMx sync.Mutex
 	teamMx sync.Mutex
 
+	teamInfoMx sync.Mutex
 	recv notification.Receiver
 }
 
@@ -49,6 +51,7 @@ func NewChannelSender(ctx context.Context, cfg Config) (*ChannelSender, error) {
 
 		listCache: newTTLCache[string, []Channel](250, time.Minute),
 		chanCache: newTTLCache[string, *Channel](1000, 15*time.Minute),
+		teamInfoCache: newTTLCache[string, *slack.TeamInfo](1, 24*time.Hour),
 	}, nil
 }
 
@@ -117,14 +120,25 @@ func (s *ChannelSender) Channel(ctx context.Context, channelID string) (*Channel
 }
 
 func (s *ChannelSender) TeamName(ctx context.Context, id string) (name string, err error) {
+	s.teamInfoMx.Lock()
+	defer s.teamInfoMx.Unlock()
+
+	info, ok := s.teamInfoCache.Get(id)
+	if ok {
+		return info.Name, nil
+	}
+
 	err = s.withClient(ctx, func(c *slack.Client) error {
 		info, err := c.GetTeamInfoContext(ctx)
 		if err != nil {
 			return err
 		}
+
 		name = info.Name
+		s.teamInfoCache.Add(id, info)
 		return nil
 	})
+
 	return name, err
 }
 
